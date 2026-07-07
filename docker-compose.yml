@@ -1,0 +1,74 @@
+# =============================================================================
+# ZerosAndOnes Website — Compose stack
+# -----------------------------------------------------------------------------
+# Single static-site service: the Vite production bundle served by nginx.
+# See Dockerfile + nginx.conf for details.
+#
+# Usage:
+#   docker compose up -d --build      # build image & start in background
+#   docker compose logs -f web        # tail logs
+#   docker compose ps                 # check status / healthcheck
+#   docker compose down               # stop and remove containers
+#
+# Visit:  http://localhost:4500
+#
+# Override the host port without editing this file:
+#   HOST_PORT=8080 docker compose up -d
+# =============================================================================
+
+name: zerosandones
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zerosandones-web:latest
+    container_name: zerosandones-web
+    restart: unless-stopped
+
+    ports:
+      - "${HOST_PORT:-4500}:4500"
+
+    environment:
+      TZ: ${TZ:-UTC}
+
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:4500/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    # NOTE: Intentionally NO bind mounts.
+    #   - For CI/CD (Jenkins): the Dockerfile already builds the Vite bundle
+    #     and bakes /dist into the image. Bind mounts also break when Jenkins
+    #     itself runs in a container against the host docker daemon (source
+    #     paths on the Jenkins container do not exist on the docker host).
+    #   - For local dev hot-reload: use `npm run dev` (Vite dev server on
+    #     :5173), or create a docker-compose.override.yml that mounts ./ into
+    #     the container and runs `npm run dev` instead of nginx.
+
+    # Drop everything we don't need; nginx only needs to bind 4500 and read.
+    security_opt:
+      - no-new-privileges:true
+
+    # Sensible production resource ceiling.
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 128M
+
+    networks:
+      - zerosandones-net
+
+    labels:
+      org.opencontainers.image.title: "ZerosAndOnes Website"
+      org.opencontainers.image.description: "ZerosAndOnes marketing site — Vite + React SPA served by nginx"
+      org.opencontainers.image.source: "https://github.com/your-org/ZerosandOnesWebsite"
+
+networks:
+  zerosandones-net:
+    name: zerosandones-net
+    driver: bridge

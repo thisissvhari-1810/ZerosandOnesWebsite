@@ -1,0 +1,38 @@
+# Keep the Docker build context lean and reproducible.
+# node_modules is reinstalled from lockfile inside the image.
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local build artefacts — the image runs its own `npm run build`.
+dist
+dist-ssr
+build
+*.local
+*.tsbuildinfo
+
+# VCS / editor / OS cruft
+.git
+.gitignore
+.gitattributes
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Env files never belong in an image.
+.env
+.env.*
+!.env.example
+
+# Docker / CI files themselves don't need to ship inside the image.
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+Jenkinsfile
+
+# Docs
+README.md
