@@ -1,4 +1,3 @@
-import { Suspense, lazy } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, PlayCircle, Sparkles, ArrowDown } from "lucide-react";
 import { LinkButton } from "@/components/ui/Button";
@@ -10,10 +9,6 @@ import { GridMesh } from "@/components/backgrounds/GridMesh";
 import { Stars } from "@/components/backgrounds/Stars";
 import { fadeUp, stagger } from "@/lib/motion";
 
-const HeroCanvas = lazy(() =>
-  import("@/three/HeroCanvas").then((m) => ({ default: m.HeroCanvas }))
-);
-
 const ROTATING = [
   "AI",
   "Cloud",
@@ -24,10 +19,9 @@ const ROTATING = [
 ];
 
 /**
- * A cinematic hero: aurora + stars + grid backdrop, a lazy-loaded 3D
- * globe canvas on the right (with post-processing bloom), a huge
- * split-reveal headline with a rotating word, dual magnetic CTAs, live
- * "system status" chip and a subtle scroll indicator that parallaxes out.
+ * A cinematic hero: aurora + stars + grid backdrop, a huge split-reveal
+ * headline with a rotating word, dual magnetic CTAs, live "system status"
+ * chip and a subtle scroll indicator that parallaxes out.
  */
 export function Hero() {
   const { scrollY } = useScroll();
@@ -42,16 +36,6 @@ export function Hero() {
       <Aurora intensity="strong" />
       <GridMesh />
       <Stars />
-
-      {/* 3D layer — full width on mobile, right half on desktop */}
-      <div className="absolute inset-0 -z-[1] lg:left-[38%]">
-        <Suspense fallback={<HeroFallback />}>
-          <HeroCanvas />
-        </Suspense>
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/60 via-transparent to-background lg:from-transparent lg:via-background/10 lg:to-background/60" />
-        {/* Radial vignette on the right edge */}
-        <div className="pointer-events-none absolute inset-0 hidden lg:block bg-[radial-gradient(ellipse_at_right_center,transparent_0%,transparent_45%,rgba(4,6,13,0.6)_100%)]" />
-      </div>
 
       <motion.div
         style={{ y: parallaxY, opacity: parallaxFade }}
@@ -178,13 +162,5 @@ export function Hero() {
         <ArrowDown className="h-3 w-3 opacity-0 -translate-y-1 transition-all group-hover:opacity-100 group-hover:translate-y-0" />
       </motion.a>
     </section>
-  );
-}
-
-function HeroFallback() {
-  return (
-    <div className="relative flex h-full w-full items-center justify-center">
-      <div className="h-64 w-64 rounded-full border border-neon-500/30 animate-pulse" />
-    </div>
   );
 }
