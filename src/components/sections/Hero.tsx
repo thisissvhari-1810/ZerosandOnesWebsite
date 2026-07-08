@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import {
   motion,
-  useMotionTemplate,
   useMotionValue,
   useScroll,
   useSpring,
@@ -30,23 +29,25 @@ const STATS = [
  */
 export function Hero() {
   const { scrollY } = useScroll();
-  const parallaxY = useTransform(scrollY, [0, 500], [0, 80]);
-  const parallaxFade = useTransform(scrollY, [0, 400], [1, 0]);
+  const parallaxY = useTransform(scrollY, [0, 500], [0, 60]);
 
-  // Mouse-tracked spotlight (desktop)
-  const mx = useMotionValue(50);
-  const my = useMotionValue(50);
+  // Mouse-tracked spotlight (desktop). We drive a translated layer instead of
+  // rewriting a viewport-sized radial-gradient background every frame, so the
+  // browser can GPU-composite it and scrolling stays smooth.
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
   const smx = useSpring(mx, { stiffness: 55, damping: 22, mass: 0.6 });
   const smy = useSpring(my, { stiffness: 55, damping: 22, mass: 0.6 });
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      mx.set((e.clientX / window.innerWidth) * 100);
-      my.set((e.clientY / window.innerHeight) * 100);
+      mx.set(e.clientX);
+      my.set(e.clientY);
     };
     window.addEventListener("mousemove", onMove, { passive: true });
     return () => window.removeEventListener("mousemove", onMove);
   }, [mx, my]);
-  const spotlightBg = useMotionTemplate`radial-gradient(680px circle at ${smx}% ${smy}%, rgba(34,211,238,0.18), rgba(139,92,246,0.10) 30%, transparent 62%)`;
+  const spotX = useTransform(smx, (v) => v - 340);
+  const spotY = useTransform(smy, (v) => v - 340);
 
   return (
     <section
@@ -67,11 +68,17 @@ export function Hero() {
         <div className="absolute -inset-x-32 top-[64%] h-40 rotate-[6deg] bg-gradient-to-r from-transparent via-electric-500/10 to-transparent blur-3xl" />
       </div>
 
-      {/* Mouse-tracked spotlight */}
+      {/* Mouse-tracked spotlight — a translated blurred blob, GPU-composited. */}
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-[2] hidden md:block"
-        style={{ backgroundImage: spotlightBg }}
+        className="pointer-events-none fixed top-0 left-0 -z-[2] hidden md:block h-[680px] w-[680px] rounded-full"
+        style={{
+          x: spotX,
+          y: spotY,
+          background:
+            "radial-gradient(circle, rgba(34,211,238,0.18), rgba(139,92,246,0.10) 30%, transparent 62%)",
+          willChange: "transform",
+        }}
       />
 
       {/* Readable scrim behind the headline so text stays legible over the globe */}
@@ -107,7 +114,7 @@ export function Hero() {
 
       {/* Content overlay */}
       <motion.div
-        style={{ y: parallaxY, opacity: parallaxFade }}
+        style={{ y: parallaxY, willChange: "transform" }}
         className="container-wide relative z-10 flex min-h-[calc(100vh-var(--nav-height))] items-center justify-center py-24"
       >
         <motion.div
@@ -220,7 +227,6 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.4, duration: 0.8 }}
-        style={{ opacity: parallaxFade }}
         className="group pointer-events-auto absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 text-white/40 hover:text-white transition-colors z-10"
       >
         <span className="text-[10px] uppercase tracking-[0.32em]">Scroll</span>
