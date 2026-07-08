@@ -45,7 +45,7 @@ export function WordRotator({
           animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
           exit={{ y: "-60%", opacity: 0, filter: "blur(8px)" }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute inset-0 flex items-center text-gradient"
+          className="absolute left-0 top-0 text-gradient"
         >
           {words[i]}
         </motion.span>
