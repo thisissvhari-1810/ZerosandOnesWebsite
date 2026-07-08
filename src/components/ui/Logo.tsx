@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BRAND } from "@/data/navigation";
+import { BRAND, NAV_LINKS } from "@/data/navigation";
 
 interface LogoProps {
   className?: string;
@@ -8,6 +8,14 @@ interface LogoProps {
 }
 
 export function Logo({ className, showText = true }: LogoProps) {
+  const location = useLocation();
+  const currentNav = NAV_LINKS.find((item) =>
+    item.to === "/"
+      ? location.pathname === "/"
+      : location.pathname.startsWith(item.to)
+  );
+  const currentPageLabel = currentNav?.label ?? BRAND.name;
+
   return (
     <Link
       to="/"
@@ -22,9 +30,14 @@ export function Logo({ className, showText = true }: LogoProps) {
         <span className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-br from-neon-500/40 via-cyan-glow/30 to-electric-500/40 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </span>
       {showText && (
-        <span className="font-display text-lg font-semibold tracking-tight text-white">
-          {BRAND.name}
-        </span>
+        <>
+          <span className="hidden xl:inline font-display text-lg font-semibold tracking-tight text-white">
+            {BRAND.name}
+          </span>
+          <span className="xl:hidden font-display text-lg font-semibold tracking-tight text-white">
+            {currentPageLabel}
+          </span>
+        </>
       )}
     </Link>
   );
