@@ -30,14 +30,9 @@ export function Logo({ className, showText = true }: LogoProps) {
         <span className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-br from-neon-500/40 via-cyan-glow/30 to-electric-500/40 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </span>
       {showText && (
-        <>
-          <span className="hidden xl:inline font-display text-lg font-semibold tracking-tight text-white">
-            {BRAND.name}
-          </span>
-          <span className="xl:hidden font-display text-lg font-semibold tracking-tight text-white">
-            {currentPageLabel}
-          </span>
-        </>
+        <span className="font-display text-lg font-semibold tracking-tight text-white">
+          {currentPageLabel}
+        </span>
       )}
     </Link>
   );
