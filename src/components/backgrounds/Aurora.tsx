@@ -61,6 +61,15 @@ export function Aurora({ className, intensity = "medium" }: AuroraProps) {
           conic
         )}
       />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2, delay: 0.6 }}
+        className={cn(
+          "absolute top-1/2 left-1/2 h-[380px] w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[90px] bg-white/[0.04]",
+          blob
+        )}
+      />
     </div>
   );
 }

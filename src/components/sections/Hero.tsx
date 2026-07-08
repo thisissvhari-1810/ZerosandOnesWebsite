@@ -1,4 +1,12 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect } from "react";
+import {
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { ArrowRight, PlayCircle, Sparkles, ArrowDown } from "lucide-react";
 import { LinkButton } from "@/components/ui/Button";
 import { MagneticButton } from "@/animations/MagneticButton";
@@ -20,13 +28,31 @@ const ROTATING = [
 
 /**
  * A cinematic hero: aurora + stars + grid backdrop, a huge split-reveal
- * headline with a rotating word, dual magnetic CTAs, live "system status"
- * chip and a subtle scroll indicator that parallaxes out.
+ * headline with a rotating word, mouse-tracked spotlight, cinemascope
+ * corner brackets, vignette overlay and dual magnetic CTAs. Fully
+ * centered on every breakpoint.
  */
 export function Hero() {
   const { scrollY } = useScroll();
   const parallaxY = useTransform(scrollY, [0, 500], [0, 80]);
   const parallaxFade = useTransform(scrollY, [0, 400], [1, 0]);
+
+  // Mouse-tracked spotlight (desktop only)
+  const mx = useMotionValue(50);
+  const my = useMotionValue(35);
+  const smx = useSpring(mx, { stiffness: 55, damping: 22, mass: 0.6 });
+  const smy = useSpring(my, { stiffness: 55, damping: 22, mass: 0.6 });
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      mx.set((e.clientX / window.innerWidth) * 100);
+      my.set((e.clientY / window.innerHeight) * 100);
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, [mx, my]);
+
+  const spotlightBg = useMotionTemplate`radial-gradient(620px circle at ${smx}% ${smy}%, rgba(34,211,238,0.22), rgba(139,92,246,0.12) 30%, transparent 62%)`;
 
   return (
     <section
@@ -37,18 +63,59 @@ export function Hero() {
       <GridMesh />
       <Stars />
 
+      {/* Mouse-tracked spotlight */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-[5] hidden md:block"
+        style={{ backgroundImage: spotlightBg }}
+      />
+
+      {/* Ambient diagonal beam sweep */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-[6] overflow-hidden"
+      >
+        <div className="absolute -inset-x-32 top-[38%] h-56 rotate-[-8deg] bg-gradient-to-r from-transparent via-cyan-glow/10 to-transparent blur-3xl" />
+        <div className="absolute -inset-x-32 top-[62%] h-40 rotate-[6deg] bg-gradient-to-r from-transparent via-electric-500/10 to-transparent blur-3xl" />
+      </div>
+
+      {/* Cinematic vignette */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-[4]"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 55%, rgba(4,6,13,0.9) 100%)",
+        }}
+      />
+
+      {/* Cinemascope corner brackets */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-6 md:inset-10 -z-[3]"
+      >
+        <div className="absolute top-0 left-0 h-7 w-7 border-l border-t border-white/15" />
+        <div className="absolute top-0 right-0 h-7 w-7 border-r border-t border-white/15" />
+        <div className="absolute bottom-0 left-0 h-7 w-7 border-l border-b border-white/15" />
+        <div className="absolute bottom-0 right-0 h-7 w-7 border-r border-b border-white/15" />
+      </div>
+
       <motion.div
         style={{ y: parallaxY, opacity: parallaxFade }}
-        className="container-wide relative flex min-h-[calc(100vh-var(--nav-height))] items-center py-24"
+        className="container-wide relative flex min-h-[calc(100vh-var(--nav-height))] items-center justify-center py-24"
       >
         <motion.div
           variants={stagger}
           initial="hidden"
           animate="visible"
-          className="max-w-3xl lg:max-w-2xl"
+          className="mx-auto w-full max-w-5xl text-center"
         >
-          <motion.div variants={fadeUp} className="mb-6">
+          <motion.div variants={fadeUp} className="mb-6 flex justify-center">
             <span className="inline-flex items-center gap-2 rounded-full glass px-3.5 py-1.5 text-xs uppercase tracking-[0.24em] text-neon-200 shadow-[0_0_28px_rgba(26,153,255,0.08)_inset]">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inset-0 rounded-full bg-cyan-glow opacity-75 animate-ping" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-glow" />
+              </span>
               <Sparkles className="h-3.5 w-3.5" />
               Premium IT Solutions · Awwwards-caliber engineering
             </span>
@@ -61,14 +128,21 @@ export function Hero() {
               className="block"
               stagger={0.02}
             />
-            <span className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+            <span className="mt-3 flex flex-wrap items-baseline justify-center gap-x-4 gap-y-2">
               <span className="text-white/60 text-4xl sm:text-5xl md:text-6xl lg:text-[4.2rem]">
                 with
               </span>
-              <WordRotator
-                words={ROTATING}
-                className="text-6xl sm:text-7xl md:text-[5.4rem] lg:text-[6rem] headline"
-              />
+              <span className="relative inline-block">
+                {/* Glow aura behind the rotating word */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-x-10 -inset-y-6 -z-10 rounded-full bg-gradient-to-r from-neon-500/25 via-cyan-glow/25 to-electric-500/25 blur-3xl"
+                />
+                <WordRotator
+                  words={ROTATING}
+                  className="text-6xl sm:text-7xl md:text-[5.4rem] lg:text-[6rem] headline"
+                />
+              </span>
             </span>
             <SplitText
               text="Cloud & DevOps."
@@ -81,7 +155,7 @@ export function Hero() {
 
           <motion.p
             variants={fadeUp}
-            className="mt-8 max-w-xl text-base md:text-lg text-white/70 leading-relaxed"
+            className="mx-auto mt-8 max-w-2xl text-base md:text-lg text-white/70 leading-relaxed"
           >
             We design, build and operate the platforms behind ambitious
             enterprises — cloud, DevOps, AI, data and security engineered by
@@ -90,7 +164,7 @@ export function Hero() {
 
           <motion.div
             variants={fadeUp}
-            className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-3"
+            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
           >
             <MagneticButton>
               <LinkButton
@@ -116,14 +190,17 @@ export function Hero() {
           {/* Live-stat strip */}
           <motion.div
             variants={fadeUp}
-            className="mt-14 grid max-w-xl grid-cols-3 gap-4"
+            className="mx-auto mt-14 grid max-w-2xl grid-cols-3 gap-4"
           >
             {[
               { v: "10+", l: "Years" },
               { v: "250+", l: "Projects" },
               { v: "99.99%", l: "Uptime SLA" },
             ].map((s) => (
-              <div key={s.l} className="border-l border-white/10 pl-4">
+              <div
+                key={s.l}
+                className="text-center border-t border-white/10 pt-4"
+              >
                 <p className="font-display text-2xl md:text-3xl font-semibold text-gradient">
                   {s.v}
                 </p>
