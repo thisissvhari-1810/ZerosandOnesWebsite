@@ -11,20 +11,10 @@ import { ArrowRight, PlayCircle, Sparkles, ArrowDown } from "lucide-react";
 import { LinkButton } from "@/components/ui/Button";
 import { MagneticButton } from "@/animations/MagneticButton";
 import { SplitText } from "@/animations/SplitText";
-import { WordRotator } from "@/animations/WordRotator";
 import { Aurora } from "@/components/backgrounds/Aurora";
 import { GridMesh } from "@/components/backgrounds/GridMesh";
 import { Stars } from "@/components/backgrounds/Stars";
 import { fadeUp, stagger } from "@/lib/motion";
-
-const ROTATING = [
-  "AI",
-  "Cloud",
-  "DevOps",
-  "Data",
-  "Automation",
-  "Security",
-];
 
 const STATS = [
   { v: "10+", l: "Years" },
@@ -154,7 +144,7 @@ export function Hero() {
               stagger={0.02}
             />
 
-            {/* with [rotating word] — supporting line, aligned baseline */}
+            {/* with Zeros and Ones — supporting line, aligned baseline */}
             <span className="mt-6 flex flex-nowrap items-baseline justify-center gap-x-3 sm:gap-x-4 text-[2rem] sm:text-[2.5rem] md:text-[3rem] lg:text-[3.5rem] whitespace-nowrap">
               <span className="text-white/50 font-normal">with</span>
               <span className="relative inline-block">
@@ -162,7 +152,9 @@ export function Hero() {
                   aria-hidden
                   className="pointer-events-none absolute -inset-x-10 -inset-y-6 -z-10 rounded-full bg-gradient-to-r from-neon-500/30 via-cyan-glow/25 to-electric-500/30 blur-3xl"
                 />
-                <WordRotator words={ROTATING} className="font-semibold" />
+                <span className="font-semibold text-gradient">
+                  Zeros and Ones
+                </span>
               </span>
             </span>
           </h1>
